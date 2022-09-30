@@ -1,4 +1,5 @@
 from Board import Board
+from GameOverException import GameOverException
 
 # Goal: to create a basic command prompt based version of minesweeper using Python.
 def run_game():
@@ -7,16 +8,17 @@ def run_game():
 
     while not game_over:
         game_board.print_board()
-        move = input("Enter action: <row>-<col>-<action>\n\"r\" = reveal, \"f\" = flag\n")
+        move = input("Enter action: <row><col><action>\n\"r\" = reveal, \"f\" = flag\n")
         try:
-            col = int(move[0:move.index("-")])
-            move = move[move.index("-") + 1:]
-            row = int(move[0:move.index("-")])
-            move = move[move.index("-") + 1:]
-            action = move
+            row = int(move[0])
+            col = int(move[1])
+            action = move[2]
             game_board.process_tile(row, col, action)
-        except(TypeError):
+        except (TypeError, ValueError):
             print("Invalid input")
-        except(GameOver)
+        except GameOverException as e:
+            game_board.print_board()
+            print(e)
+            game_over = True
 
 run_game()

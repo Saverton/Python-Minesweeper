@@ -1,4 +1,7 @@
 # tile on a minesweeper board, has flags for is_mine,  is_flagged, and is_revealed
+from GameOverException import GameOverException
+
+
 class Tile:
     def __init__(self, row, col, board):
         self.is_mine = False
@@ -11,13 +14,15 @@ class Tile:
 
     # flag a tile
     def flag(self):
+        self.is_revealed = True
         self.is_flagged = True
 
     # reveal a tile
     def reveal(self):
         self.is_revealed = True
+        self.is_flagged = False
         if self.is_mine:
-            print("Lose")
+            raise GameOverException("You Lose!")
         elif self.surrounding_mines == 0:
             self.reveal_surrounding()
 
@@ -25,8 +30,8 @@ class Tile:
     def reveal_surrounding(self):
         check_row = max(self.row - 1, 0)
         check_col = max(self.col - 1, 0)
-        for row in range(check_row, min(check_row + 3, len(self.board))):
-            for col in range(check_col, min(check_col + 3, len(self.board[0]))):
+        for row in range(check_row, min(self.row + 2, len(self.board))):
+            for col in range(check_col, min(self.col + 2, len(self.board[0]))):
                 if not self.board[row][col].is_revealed:
                     self.board[row][col].reveal()
 
@@ -35,8 +40,8 @@ class Tile:
         check_row = max(self.row - 1, 0)
         check_col = max(self.col - 1, 0)
         count = 0 # count of the number of surrounding mines
-        for row in range(check_row, min(check_row + 3, len(self.board))):
-            for col in range(check_col, min(check_col + 3, len(self.board[0]))):
+        for row in range(check_row, min(self.row + 2, len(self.board))):
+            for col in range(check_col, min(self.col + 2, len(self.board[0]))):
                 if self.board[row][col].is_mine:
                     count += 1
         self.surrounding_mines = count

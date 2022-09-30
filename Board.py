@@ -1,5 +1,6 @@
 from Tile import Tile
 import random
+from GameOverException import GameOverException
 
 # board class for minesweeper
 class Board:
@@ -29,20 +30,31 @@ class Board:
             random_col = random.randint(0, len(self.board_tiles[0]) - 1)
         self.board_tiles[random_row][random_col].reveal() # reveal starting tile
 
+    # process an action on a selected tile
     def process_tile(self, row, col, action):
         try:
             if action == "f":
                 print("Flagging (" + str(row) + ", " + str(col) + ")")
-                self.board_tiles[col][row].flag()
+                self.board_tiles[row][col].flag()
             elif action == "r":
                 print("Revealing (" + str(row) + ", " + str(col) + ")")
-                self.board_tiles[col][row].reveal()
+                self.board_tiles[row][col].reveal()
             else:
                 raise TypeError("Invalid action")
-        except(IndexError):
+            if self.check_for_win():
+                raise GameOverException("You Win!")
+        except IndexError:
             print("Invalid coordinate")
-        except(Exception):
-            print(Exception)
+        except TypeError as error:
+            print(error)
+
+    # check for a game win
+    def check_for_win(self):
+        for row in self.board_tiles:
+            for tile in row:
+                if (tile.is_mine and not tile.is_flagged) or (not tile.is_mine and tile.is_flagged):
+                    return False
+        return True
         
     # print the minesweeper board
     def print_board(self):
