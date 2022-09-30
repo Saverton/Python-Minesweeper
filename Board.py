@@ -1,3 +1,6 @@
+from Tile import Tile
+import random
+
 # board class for minesweeper
 class Board:
 
@@ -6,7 +9,40 @@ class Board:
         for row_index in range(height):
             self.board_tiles.append([])
             for col_index in range(width):
-                self.board_tiles[row_index].append("a")
+                self.board_tiles[row_index].append(Tile(row_index, col_index, self.board_tiles))
+        self.generate_board(10) # generate the board with 10 mines
+
+    # generate a random minesweeper board with x max number of mines
+    def generate_board(self, number_of_mines):
+        for index in range(number_of_mines):
+            random_row = random.randint(0, len(self.board_tiles) - 1)
+            random_col = random.randint(0, len(self.board_tiles[0]) - 1)
+            self.board_tiles[random_row][random_col].is_mine = True
+        for row in self.board_tiles:
+            for tile in row:
+                if not tile.is_mine:
+                    tile.count_surrounding_mines()
+        random_row = random.randint(0, len(self.board_tiles) - 1)
+        random_col = random.randint(0, len(self.board_tiles[0]) - 1)
+        while self.board_tiles[random_row][random_col].is_mine or self.board_tiles[random_row][random_col].surrounding_mines > 0:
+            random_row = random.randint(0, len(self.board_tiles) - 1)
+            random_col = random.randint(0, len(self.board_tiles[0]) - 1)
+        self.board_tiles[random_row][random_col].reveal() # reveal starting tile
+
+    def process_tile(self, row, col, action):
+        try:
+            if action == "f":
+                print("Flagging (" + str(row) + ", " + str(col) + ")")
+                self.board_tiles[col][row].flag()
+            elif action == "r":
+                print("Revealing (" + str(row) + ", " + str(col) + ")")
+                self.board_tiles[col][row].reveal()
+            else:
+                raise TypeError("Invalid action")
+        except(IndexError):
+            print("Invalid coordinate")
+        except(Exception):
+            print(Exception)
         
     # print the minesweeper board
     def print_board(self):
@@ -36,6 +72,6 @@ class Board:
     # print a row in a minesweeper board
     def print_board_row(board_row, index):
         line = " " + str(index) + " |"
-        for index in board_row:
-            line += " " + str(index) + " |"
+        for tile in board_row:
+            line += " " + tile.get_tile_string() + " |"
         print(line)
